@@ -93,6 +93,13 @@ ticketForm.addEventListener("submit", async function (e) {
     return;
   }
 
+  const submitBtn = document.getElementById("submitBtn");
+  const submitBtnText = document.getElementById("submitBtnText");
+
+  submitBtn.disabled = true;
+  submitBtn.classList.add("loading");
+  submitBtnText.textContent = "Getting your number...";
+
   try {
     // 3. Ask the database for the next number (atomic - no duplicates
     //    possible even with simultaneous submissions)
@@ -119,12 +126,21 @@ ticketForm.addEventListener("submit", async function (e) {
 
   } catch (err) {
     showError("Something went wrong saving your info. Please try again.");
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("loading");
+    submitBtnText.textContent = "Get My Number";
   }
 
 });
 
 document.getElementById("againBtn").addEventListener("click", function () {
   ticketForm.reset();
+
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = false;
+  submitBtn.classList.remove("loading");
+  document.getElementById("submitBtnText").textContent = "Get My Number";
+
   document.getElementById("successCard").style.display = "none";
   document.getElementById("formCard").style.display = "block";
 });

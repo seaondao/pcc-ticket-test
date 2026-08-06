@@ -171,6 +171,10 @@ input:focus{
   font-family:inherit;
   cursor:pointer;
   transition:background .15s ease, transform .1s ease;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
 .submit-btn:hover{ background:var(--mango-dark); color:#fff; }
 .submit-btn:active{ transform:scale(0.98); }
@@ -178,6 +182,21 @@ input:focus{
   background:#DDD6C0;
   color:#9A9482;
   cursor:not-allowed;
+}
+
+.spinner{
+  display:none;
+  width:18px;
+  height:18px;
+  border:2.5px solid rgba(0,0,0,0.2);
+  border-top-color:currentColor;
+  border-radius:50%;
+  animation:spin 0.7s linear infinite;
+}
+.submit-btn.loading .spinner{ display:inline-block; }
+
+@keyframes spin{
+  to{ transform:rotate(360deg); }
 }
 
 .error-msg{
