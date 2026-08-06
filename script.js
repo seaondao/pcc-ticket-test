@@ -4,8 +4,8 @@ const ticketForm = document.getElementById("ticketForm");
 // PASTE YOUR SUPABASE PROJECT URL AND ANON KEY HERE
 // (both found in Project Settings > API)
 // ================================================================
-const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
-const SUPABASE_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
+const SUPABASE_URL = "https://gvxbvtgerbbckzwslouz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eGJ2dGdlcmJiY2t6d3Nsb3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5NzQyMDUsImV4cCI6MjEwMTU1MDIwNX0.69dnoHSwbGWN7RcHjDmefOo7EyDaUCX2ZvuQtAd0mTM";
 
 // Supabase's REST API needs these two headers on every request, so
 // we keep them in one place instead of repeating them everywhere.
