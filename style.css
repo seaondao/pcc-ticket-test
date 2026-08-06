@@ -1,17 +1,19 @@
 :root{
   --lagoon-deep:#0B4A47;
   --lagoon-mid:#1C6E67;
-  --sand:#FBF1E7;
+  --sand:#FFFFFF;
   --sand-card:#FFFFFF;
   --mango:#E8703A;
   --mango-dark:#C85A26;
   --hibiscus:#C4452E;
-  --ink:#3A2E26;
-  --ink-soft:#7A6F63;
+  --ink:#4A4438;
+  --ink-soft:#5C7A96;
   --line:#EAD9C7;
   --brand-brown:#3B2E26;
   --brand-brown-light:#4A3A30;
   --brand-cream:#D8C9A3;
+  --badge-bg:#B2DDDB;
+  --badge-text:#2E3A45;
 }
 *{box-sizing:border-box;}
 body{
@@ -19,7 +21,7 @@ body{
   min-height:100vh;
   background:var(--sand);
   color:var(--ink);
-  font-family:'Inter',sans-serif;
+  font-family:'Lora',serif;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -52,11 +54,12 @@ header{
   text-align:left;
 }
 .brand-name{
-  font-family:'Fraunces',serif;
-  font-weight:600;
-  font-size:16px;
+  font-family:'Alfa Slab One',serif;
+  font-weight:400;
+  font-size:15px;
   color:#fff;
-  line-height:1.25;
+  line-height:1.3;
+  letter-spacing:0.3px;
 }
 .brand-tagline{
   font-size:11.5px;
@@ -70,12 +73,12 @@ header{
   padding:22px 4px 6px;
 }
 .page-title{
-  font-family:'Fraunces',serif;
-  font-weight:600;
-  font-size:20px;
-  color:var(--lagoon-mid);
-  margin:0 0 6px;
-  letter-spacing:0.2px;
+  font-family:'Alfa Slab One',serif;
+  font-weight:400;
+  font-size:19px;
+  color:var(--ink);
+  margin:0 0 8px;
+  letter-spacing:0.3px;
 }
 .page-subtitle{
   margin:0;
@@ -120,7 +123,7 @@ input[type="text"], input[type="email"]{
 }
 input:focus{
   outline:none;
-  border-color:var(--lagoon-mid);
+  border-color:var(--mango);
   box-shadow:0 0 0 3px rgba(232,112,58,0.15);
 }
 
@@ -139,6 +142,7 @@ input:focus{
   display:flex;
   align-items:flex-start;
   gap:8px;
+  font-family:'Inter',system-ui,sans-serif;
   font-size:13.5px;
   font-weight:400;
   color:var(--ink);
@@ -195,11 +199,15 @@ input:focus{
 .form-card.hide{ display:none; }
 
 .ticket-label{
-  font-size:13px;
-  font-weight:600;
-  color:var(--ink-soft);
+  display:inline-block;
+  font-size:12px;
+  font-weight:700;
+  color:var(--badge-text);
+  background:var(--badge-bg);
   text-transform:uppercase;
   letter-spacing:1.2px;
+  padding:5px 14px;
+  border-radius:999px;
 }
 .ticket-number{
   font-family:'JetBrains Mono',monospace;
@@ -215,6 +223,15 @@ input:focus{
   color:var(--ink-soft);
   line-height:1.55;
   margin-bottom:20px;
+}
+.confirm-details{
+  font-size:13px;
+  color:var(--ink-soft);
+  background:#F5F0E8;
+  border-radius:8px;
+  padding:10px 12px;
+  margin:0 0 20px;
+  line-height:1.6;
 }
 .again-btn{
   background:transparent;
@@ -238,11 +255,12 @@ footer{
   line-height:1.7;
 }
 .footer-name{
-  font-family:'Fraunces',serif;
-  font-weight:600;
-  font-size:16px;
+  font-family:'Alfa Slab One',serif;
+  font-weight:400;
+  font-size:15px;
   color:#fff;
-  margin-bottom:4px;
+  margin-bottom:6px;
+  letter-spacing:0.3px;
 }
 .footer-line{
   color:var(--brand-cream);

@@ -112,6 +112,8 @@ ticketForm.addEventListener("submit", async function (e) {
 
     // 6. Show the number on screen
     document.getElementById("ticketNumber").textContent = ticketNumber;
+    document.getElementById("confirmName").textContent = firstName + " " + lastName;
+    document.getElementById("confirmEmail2").textContent = email;
     document.getElementById("formCard").style.display = "none";
     document.getElementById("successCard").style.display = "block";
 
