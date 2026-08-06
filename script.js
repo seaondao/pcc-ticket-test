@@ -4,8 +4,8 @@ const ticketForm = document.getElementById("ticketForm");
 // PASTE YOUR SUPABASE PROJECT URL AND ANON KEY HERE
 // (both found in Project Settings > API)
 // ================================================================
-const SUPABASE_URL = "https://gvxbvtgerbbckzwslouz.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eGJ2dGdlcmJiY2t6d3Nsb3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5NzQyMDUsImV4cCI6MjEwMTU1MDIwNX0.69dnoHSwbGWN7RcHjDmefOo7EyDaUCX2ZvuQtAd0mTM";
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_PROJECT_URL_HERE";
+const SUPABASE_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY_HERE";
 
 // Supabase's REST API needs these two headers on every request, so
 // we keep them in one place instead of repeating them everywhere.
@@ -16,24 +16,27 @@ const SUPABASE_HEADERS = {
 };
 
 // ----------------------------------------------------------------
-// Fetches just the ticket_number column from every row, so we know
-// which numbers are already used. Supabase handles CORS properly,
-// so this is just a normal fetch() - no workarounds needed.
+// Asks the database for the next ticket number. This calls a
+// Postgres SEQUENCE on the backend (via an RPC function), which
+// guarantees no two people ever get the same number - even if they
+// submit at the exact same moment. The database handles that safely;
+// we don't have to (and shouldn't try to) calculate it ourselves.
 // ----------------------------------------------------------------
-async function getExistingNumbers() {
+async function getNextTicketNumber() {
   const response = await fetch(
-    SUPABASE_URL + "/rest/v1/submissions?select=ticket_number",
-    { headers: SUPABASE_HEADERS }
+    SUPABASE_URL + "/rest/v1/rpc/get_next_ticket_number",
+    {
+      method: "POST",
+      headers: SUPABASE_HEADERS,
+      body: JSON.stringify({})
+    }
   );
 
   if (!response.ok) {
     throw new Error("Could not reach the backend.");
   }
 
-  const rows = await response.json(); // e.g. [{ ticket_number: "482913" }, ...]
-  return rows.map(function (row) {
-    return row.ticket_number;
-  });
+  return response.json(); // returns the next number, e.g. 43
 }
 
 // ----------------------------------------------------------------
@@ -55,15 +58,6 @@ async function saveSubmission(newSubmission) {
   if (!response.ok) {
     throw new Error("Backend returned an error: " + response.status);
   }
-}
-
-function generateUniqueNumber(existingNumbers) {
-  let num;
-  do {
-    num = Math.floor(100000 + Math.random() * 900000);
-  } while (existingNumbers.includes(String(num)));
-
-  return num;
 }
 
 function showError(message) {
@@ -100,10 +94,9 @@ ticketForm.addEventListener("submit", async function (e) {
   }
 
   try {
-    // 3. Ask the backend which numbers are already used, then
-    //    generate one that isn't
-    const existingNumbers = await getExistingNumbers();
-    const ticketNumber = generateUniqueNumber(existingNumbers);
+    // 3. Ask the database for the next number (atomic - no duplicates
+    //    possible even with simultaneous submissions)
+    const ticketNumber = await getNextTicketNumber();
 
     // 4. Put it all together as one object
     const newSubmission = {
