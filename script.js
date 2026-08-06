@@ -1,31 +1,42 @@
 const ticketForm = document.getElementById("ticketForm");
 
 // ================================================================
-// This is the ONE function you'll need to change later, once a
-// real backend/database is decided. Everything else can stay
-// exactly the same - it just calls this function and doesn't
-// care HOW or WHERE the data actually gets saved.
+// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+// (the one you got after "Deploy > New deployment > Web app")
 // ================================================================
-function saveSubmission(newSubmission) {
-  const saved = localStorage.getItem("submissions");
-  const allSubmissions = saved ? JSON.parse(saved) : [];
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyuzFx_u2cHxcrJDgMrGEjjE2c-bZZXZ5NWUkyvnHTaiuHvPOvF1z6MxnixxPL083V0/exec";
 
-  allSubmissions.push(newSubmission);
-  localStorage.setItem("submissions", JSON.stringify(allSubmissions));
+// ----------------------------------------------------------------
+// Fetches just the list of ticket numbers already used (as strings),
+// by calling doGet() on the Apps Script backend.
+// ----------------------------------------------------------------
+async function getExistingNumbers() {
+  const response = await fetch(BACKEND_URL);
+  return response.json();
 }
 
-// Also needed by generateTicketNumber() below, to check which
-// numbers are already used - so it reads the same way for now.
-function getAllSubmissions() {
-  const saved = localStorage.getItem("submissions");
-  return saved ? JSON.parse(saved) : [];
+// ----------------------------------------------------------------
+// Sends one new submission to the Apps Script backend, which appends
+// it as a new row in the Google Sheet (calls doPost() over there).
+//
+// Note: Content-Type is "text/plain" on purpose, NOT "application/json".
+// Apps Script Web Apps don't handle the CORS "preflight" request that
+// browsers send before a real application/json POST, so this is the
+// standard workaround - the server still reads it as JSON either way.
+// ----------------------------------------------------------------
+async function saveSubmission(newSubmission) {
+  await fetch(BACKEND_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(newSubmission)
+  });
 }
 
 function generateUniqueNumber(existingNumbers) {
   let num;
   do {
     num = Math.floor(100000 + Math.random() * 900000);
-  } while (existingNumbers.includes(num));
+  } while (existingNumbers.includes(String(num)));
 
   return num;
 }
@@ -40,7 +51,7 @@ function clearError() {
   document.getElementById("errorMsg").classList.remove("show");
 }
 
-ticketForm.addEventListener("submit", function (e) {
+ticketForm.addEventListener("submit", async function (e) {
   e.preventDefault(); // stop the page from reloading
 
   // (by the time we get here, the browser has ALREADY checked every
@@ -63,26 +74,37 @@ ticketForm.addEventListener("submit", function (e) {
     return;
   }
 
-  // 3. Make a random 6-digit number that isn't already used
-  const allSubmissions = getAllSubmissions();
-  const existingNumbers = allSubmissions.map(sub => sub.ticketNumber);
-  const ticketNumber = generateUniqueNumber(existingNumbers);
+  try {
+    // 3. Ask the backend which numbers are already used, then
+    //    generate one that isn't
+    const existingNumbers = await getExistingNumbers();
+    const ticketNumber = generateUniqueNumber(existingNumbers);
 
-  // 4. Put it all together as one object
-  const newSubmission = {
-    ticketNumber: ticketNumber,
-    firstName: firstName,
-    lastName: lastName,
-    email: email,
-    agreedToPromo: document.getElementById("agreePromo").checked
-  };
+    // 4. Put it all together as one object
+    const newSubmission = {
+      ticketNumber: ticketNumber,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      agreedToPromo: document.getElementById("agreePromo").checked
+    };
 
-  // 5. Save it (today: localStorage. later: maybe a real backend)
-  saveSubmission(newSubmission);
+    // 5. Save it to the Google Sheet
+    await saveSubmission(newSubmission);
 
-  // 6. Show the number on screen
-  document.getElementById("ticketNumber").textContent = ticketNumber;
-  document.getElementById("formCard").style.display = "none";
-  document.getElementById("successCard").style.display = "block";
+    // 6. Show the number on screen
+    document.getElementById("ticketNumber").textContent = ticketNumber;
+    document.getElementById("formCard").style.display = "none";
+    document.getElementById("successCard").style.display = "block";
 
+  } catch (err) {
+    showError("Something went wrong saving your info. Please try again.");
+  }
+
+});
+
+document.getElementById("againBtn").addEventListener("click", function () {
+  ticketForm.reset();
+  document.getElementById("successCard").style.display = "none";
+  document.getElementById("formCard").style.display = "block";
 });
