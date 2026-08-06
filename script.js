@@ -1,35 +1,60 @@
 const ticketForm = document.getElementById("ticketForm");
 
 // ================================================================
-// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
-// (the one you got after "Deploy > New deployment > Web app")
+// PASTE YOUR SUPABASE PROJECT URL AND ANON KEY HERE
+// (both found in Project Settings > API)
 // ================================================================
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyuzFx_u2cHxcrJDgMrGEjjE2c-bZZXZ5NWUkyvnHTaiuHvPOvF1z6MxnixxPL083V0/exec";
+const SUPABASE_URL = "https://gvxbvtgerbbckzwslouz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2eGJ2dGdlcmJiY2t6d3Nsb3V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5NzQyMDUsImV4cCI6MjEwMTU1MDIwNX0.69dnoHSwbGWN7RcHjDmefOo7EyDaUCX2ZvuQtAd0mTM";
+
+// Supabase's REST API needs these two headers on every request, so
+// we keep them in one place instead of repeating them everywhere.
+const SUPABASE_HEADERS = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": "Bearer " + SUPABASE_KEY,
+  "Content-Type": "application/json"
+};
 
 // ----------------------------------------------------------------
-// Fetches just the list of ticket numbers already used (as strings),
-// by calling doGet() on the Apps Script backend.
+// Fetches just the ticket_number column from every row, so we know
+// which numbers are already used. Supabase handles CORS properly,
+// so this is just a normal fetch() - no workarounds needed.
 // ----------------------------------------------------------------
 async function getExistingNumbers() {
-  const response = await fetch(BACKEND_URL);
-  return response.json();
+  const response = await fetch(
+    SUPABASE_URL + "/rest/v1/submissions?select=ticket_number",
+    { headers: SUPABASE_HEADERS }
+  );
+
+  if (!response.ok) {
+    throw new Error("Could not reach the backend.");
+  }
+
+  const rows = await response.json(); // e.g. [{ ticket_number: "482913" }, ...]
+  return rows.map(function (row) {
+    return row.ticket_number;
+  });
 }
 
 // ----------------------------------------------------------------
-// Sends one new submission to the Apps Script backend, which appends
-// it as a new row in the Google Sheet (calls doPost() over there).
-//
-// Note: Content-Type is "text/plain" on purpose, NOT "application/json".
-// Apps Script Web Apps don't handle the CORS "preflight" request that
-// browsers send before a real application/json POST, so this is the
-// standard workaround - the server still reads it as JSON either way.
+// Inserts one new row into the "submissions" table.
 // ----------------------------------------------------------------
 async function saveSubmission(newSubmission) {
-  await fetch(BACKEND_URL, {
+  const response = await fetch(SUPABASE_URL + "/rest/v1/submissions", {
     method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(newSubmission)
+    headers: SUPABASE_HEADERS,
+    body: JSON.stringify({
+      ticket_number: String(newSubmission.ticketNumber),
+      first_name: newSubmission.firstName,
+      last_name: newSubmission.lastName,
+      email: newSubmission.email,
+      agreed_to_promo: newSubmission.agreedToPromo
+    })
   });
+
+  if (!response.ok) {
+    throw new Error("Backend returned an error: " + response.status);
+  }
 }
 
 function generateUniqueNumber(existingNumbers) {
@@ -89,7 +114,7 @@ ticketForm.addEventListener("submit", async function (e) {
       agreedToPromo: document.getElementById("agreePromo").checked
     };
 
-    // 5. Save it to the Google Sheet
+    // 5. Save it to Supabase
     await saveSubmission(newSubmission);
 
     // 6. Show the number on screen
