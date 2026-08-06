@@ -12,7 +12,7 @@
 
 <header>
   <div class="brand-row">
-    <img class="brand-icon" src="images/one-ohana-sharing-aloha.webp" alt="Polynesian Cultural Center logo">
+    <img class="brand-icon" src="one-ohana-sharing-aloha.webp" alt="Polynesian Cultural Center logo">
     <div class="brand-text">
       <div class="brand-name">Polynesian Cultural Center</div>
       <div class="brand-tagline">One 'Ohana Sharing Aloha</div>
@@ -29,10 +29,10 @@
   <div class="card form-card" id="formCard">
     <form id="ticketForm">
       <label for="firstName">First Name</label>
-      <input type="text" id="firstName" autocomplete="given-name" required>
+      <input type="text" id="firstName" autocomplete="given-name" required pattern="[A-Za-z\s\-']+" >
 
       <label for="lastName">Last Name</label>
-      <input type="text" id="lastName" autocomplete="family-name" required>
+      <input type="text" id="lastName" autocomplete="family-name" required pattern="[A-Za-z\s\-']+" >
 
       <label for="email">Email</label>
       <input type="email" id="email" autocomplete="email" required>
